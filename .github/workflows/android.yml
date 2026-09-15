@@ -50,7 +50,13 @@ jobs:
           mkdir -p native/android/third_party
           git clone --depth 1 https://github.com/ggml-org/llama.cpp.git native/android/third_party/llama.cpp
 
-      - name: Pack model OBB if present
+      - name: Download Model from Hugging Face
+        run: |
+          mkdir -p models
+          curl -L -o models/gemma-3-4b-persian-v0.Q4_K_M.gguf \
+            "https://huggingface.co/mradermacher/gemma-3-4b-persian-v0-GGUF/resolve/main/gemma-3-4b-persian-v0.Q4_K_M.gguf"
+
+      - name: Pack model OBB
         run: python3 scripts/build-model-obb.py
 
       - name: Write local.properties
