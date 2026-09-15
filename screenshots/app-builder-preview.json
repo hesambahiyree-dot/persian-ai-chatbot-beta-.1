@@ -1,0 +1,36 @@
+{
+  "url": "http://127.0.0.1:8080/",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "NOVA AI",
+      "hasCanvas": false,
+      "bodyTextLen": 971,
+      "bodyTextHash": "0b89961c19b3c08db3ff3dddd89a1289e1118e0a2ba81721fb1d8dc54220daae",
+      "bodyTextPrefix": "NOVA AI دستیار هوشمند فارسی نامشخص سلام، من نوا هستم دستیار فارس",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "NOVA AI",
+      "hasCanvas": false,
+      "bodyTextLen": 964,
+      "bodyTextHash": "5c30b5121aa3ea31c861ba4b858c5d5a19f87e0ecf8aa3cea6a94560d15c3e64",
+      "bodyTextPrefix": "NOVA AI دستیار هوشمند فارسی سلام، من نوا هستم دستیار فارسی شما. ",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/app-builder-preview.json"
+}

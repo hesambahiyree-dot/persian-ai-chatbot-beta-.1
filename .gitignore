@@ -1,0 +1,30 @@
+node_modules
+.output
+dist
+.tanstack
+.nitro
+*.log
+.DS_Store
+
+# Model weights — never commit
+models/*.gguf
+*.gguf
+*.obb
+
+# Android
+native/android/local.properties
+native/android/.gradle
+native/android/**/build
+native/android/**/.cxx
+native/android/third_party
+native/android/app/src/main/assets/**
+!native/android/app/src/main/assets/.gitkeep
+*.keystore
+*.jks
+*.apk
+*.aab
+
+# Secrets
+.env
+.env.*
+*.pem

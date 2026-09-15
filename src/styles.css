@@ -1,0 +1,129 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Vazirmatn", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Vazirmatn", "Segoe UI", system-ui, sans-serif;
+
+  --color-bg: #f3f0e8;
+  --color-surface: #fffdf8;
+  --color-surface-2: #ebe6d9;
+  --color-fg: #1a2a1c;
+  --color-muted: #5c6d5e;
+  --color-subtle: #8a978b;
+  --color-primary: #3fa34d;
+  --color-primary-fg: #f4fff5;
+  --color-primary-dark: #2d6a38;
+  --color-leaf: #7bc67f;
+  --color-border: #d9d3c4;
+  --color-user: #2d6a38;
+  --color-user-fg: #f4fff5;
+  --color-danger: #b42318;
+  --color-ring: #3fa34d;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
+
+  --shadow-soft: 0 10px 30px -18px rgb(26 42 28 / 0.28);
+  --shadow-float: 0 18px 40px -24px rgb(26 42 28 / 0.35);
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: var(--color-bg);
+    color: var(--color-fg);
+  }
+
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    background: var(--color-bg);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  textarea,
+  input {
+    font-family: inherit;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--color-primary) 28%, transparent);
+    color: var(--color-fg);
+  }
+}
+
+@layer utilities {
+  .nova-shell {
+    background:
+      radial-gradient(1200px 480px at 100% -10%, rgb(63 163 77 / 0.08), transparent 55%),
+      radial-gradient(900px 420px at -10% 110%, rgb(45 106 56 / 0.07), transparent 50%),
+      var(--color-bg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nova-fade,
+  .nova-rise,
+  .nova-dots span {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@keyframes nova-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes nova-dot {
+  0%,
+  80%,
+  100% {
+    opacity: 0.28;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+}
+
+.nova-rise {
+  animation: nova-rise 250ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.nova-dots span {
+  animation: nova-dot 1s ease-in-out infinite;
+}
+.nova-dots span:nth-child(2) {
+  animation-delay: 120ms;
+}
+.nova-dots span:nth-child(3) {
+  animation-delay: 240ms;
+}
