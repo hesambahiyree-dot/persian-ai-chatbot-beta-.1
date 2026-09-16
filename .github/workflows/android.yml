@@ -45,10 +45,14 @@ jobs:
       - name: Copy web assets into Android
         run: node scripts/prepare-android-assets.mjs
 
-      - name: Fetch llama.cpp
+      - name: Fetch compatible llama.cpp
         run: |
           mkdir -p native/android/third_party
-          git clone --depth 1 https://github.com/ggml-org/llama.cpp.git native/android/third_party/llama.cpp
+          git clone https://github.com/ggml-org/llama.cpp.git native/android/third_party/llama.cpp
+          cd native/android/third_party/llama.cpp
+          git checkout b3821
+          echo "=== llama.cpp version ==="
+          git log -1 --oneline
 
       - name: Download Model from Hugging Face
         run: |
@@ -68,25 +72,20 @@ jobs:
           set -e
           RES_DIR="native/android/app/src/main/res"
           SRC_ICON="$RES_DIR/mipmap-hdpi/ic_launcher.png"
-
           sudo apt-get update -qq
           sudo apt-get install -y -qq imagemagick
-
           if [ ! -f "$SRC_ICON" ]; then
             echo "ERROR: source icon not found at $SRC_ICON"
             exit 1
           fi
-
           convert "$SRC_ICON" -strip -define png:color-type=6 -resize 192x192! /tmp/fixed_icon.png
           cp /tmp/fixed_icon.png "$SRC_ICON"
-
           declare -A SIZES
           SIZES[mdpi]=48
           SIZES[hdpi]=72
           SIZES[xhdpi]=96
           SIZES[xxhdpi]=144
           SIZES[xxxhdpi]=192
-
           for density in mdpi hdpi xhdpi xxhdpi xxxhdpi; do
             mkdir -p "$RES_DIR/mipmap-$density"
             TARGET="$RES_DIR/mipmap-$density/ic_launcher.png"
@@ -98,7 +97,6 @@ jobs:
             cp /tmp/fixed_$density.png "$TARGET"
             echo "OK: mipmap-$density/ic_launcher.png (${SIZES[$density]}x${SIZES[$density]})"
           done
-
           echo "=== Final mipmap folders ==="
           ls -la "$RES_DIR" | grep mipmap || true
 
