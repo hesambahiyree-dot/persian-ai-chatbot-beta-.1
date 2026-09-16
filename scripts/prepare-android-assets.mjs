@@ -8,12 +8,19 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const dest = join(root, "native/android/app/src/main/assets");
 
 const candidates = [
-  join(root, ".output/public"),
-  join(root, "dist/client"),
-  join(root, "dist"),
+  join(root, ".vercel/output/static"),   // ✅ Vercel/Nitro output (projet NOVA)
+  join(root, ".output/public"),          // Nitro قدیمی
+  join(root, "dist/client"),             // Vite SSR
+  join(root, "dist"),                    // Vite معمولی
 ];
 
 const source = candidates.find((p) => existsSync(join(p, "index.html")) || existsSync(p));
+
+console.log(`[prepare-android-assets] candidates checked:`);
+for (const c of candidates) {
+  console.log(`  - ${c} ${existsSync(c) ? "✅" : "❌"}`);
+}
+console.log(`[prepare-android-assets] chosen source: ${source || "NONE"}`);
 
 mkdirSync(dest, { recursive: true });
 
@@ -30,20 +37,21 @@ if (!source || !existsSync(source)) {
       const to = join(dest, name);
       rmSync(to, { recursive: true, force: true });
       cpSync(from, to, { recursive: true });
+      console.log(`[prepare-android-assets] copied ${name}`);
     }
   }
   // Copy remaining top-level files (favicon, logo, etc.)
   const skip = new Set(["server", "nitro.json"]);
   try {
-    const { readdirSync, statSync } = await import("node:fs");
+    const { readdirSync } = await import("node:fs");
     for (const entry of readdirSync(source)) {
       if (skip.has(entry) || entry === "assets" || entry === "index.html") continue;
       const from = join(source, entry);
       const to = join(dest, entry);
       rmSync(to, { recursive: true, force: true });
       cpSync(from, to, { recursive: true });
+      console.log(`[prepare-android-assets] copied ${entry}`);
     }
-    void statSync;
   } catch {
     /* ignore */
   }
