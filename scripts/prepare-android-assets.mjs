@@ -55,7 +55,7 @@ if (!source || !existsSync(source)) {
 
   console.log(`[prepare-android-assets] found JS: ${jsFile}, CSS: ${cssFile}`);
 
-  // ۳. ساخت index.html که SPA رو لود کنه
+  // ۳. ساخت index.html که SPA رو لود کنه (مسیرهای نسبی برای Android WebView)
   const html = `<!doctype html>
 <html lang="fa" dir="rtl">
   <head>
@@ -63,17 +63,17 @@ if (!source || !existsSync(source)) {
     <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
     <meta name="theme-color" content="#1a2a1c" />
     <title>NOVA AI</title>
-    ${cssFile ? `<link rel="stylesheet" href="/assets/${cssFile}" />` : ""}
-    <link rel="icon" href="/favicon.svg" />
+    ${cssFile ? `<link rel="stylesheet" href="./assets/${cssFile}" />` : ""}
+    <link rel="icon" href="./favicon.svg" />
   </head>
   <body>
     <div id="root"></div>
-    ${jsFile ? `<script type="module" src="/assets/${jsFile}"></script>` : ""}
+    ${jsFile ? `<script type="module" src="./assets/${jsFile}"></script>` : ""}
   </body>
 </html>`;
 
   writeFileSync(join(dest, "index.html"), html);
-  console.log("[prepare-android-assets] generated index.html for SPA");
+  console.log("[prepare-android-assets] generated index.html for SPA (relative paths)");
 
   console.log(`[prepare-android-assets] copied ${source} -> ${dest}`);
 }
