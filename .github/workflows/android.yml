@@ -34,7 +34,7 @@ jobs:
 
       - name: Install NDK and CMake
         run: |
-          sdkmanager --install "ndk;26.1.10909125" "cmake;3.22.1" "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+          sdkmanager --install "ndk;27.2.12479018" "cmake;3.22.1" "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
       - name: Install JS dependencies
         run: npm install --no-audit --no-fund
@@ -45,13 +45,12 @@ jobs:
       - name: Copy web assets into Android
         run: node scripts/prepare-android-assets.mjs
 
-      - name: Fetch compatible llama.cpp
+      - name: Fetch llama.cpp
         run: |
           mkdir -p native/android/third_party
-          git clone https://github.com/ggml-org/llama.cpp.git native/android/third_party/llama.cpp
-          cd native/android/third_party/llama.cpp
-          git checkout b3821
+          git clone --depth 1 https://github.com/ggml-org/llama.cpp.git native/android/third_party/llama.cpp
           echo "=== llama.cpp version ==="
+          cd native/android/third_party/llama.cpp
           git log -1 --oneline
 
       - name: Download Model from Hugging Face
