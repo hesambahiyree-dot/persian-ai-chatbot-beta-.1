@@ -34,7 +34,7 @@ jobs:
 
       - name: Install NDK and CMake
         run: |
-          sdkmanager --install "ndk;27.2.12479018" "cmake;3.22.1" "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+          sdkmanager --install "ndk;26.1.10909125" "cmake;3.22.1" "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
       - name: Install JS dependencies
         run: npm install --no-audit --no-fund
@@ -50,7 +50,7 @@ jobs:
           mkdir -p native/android/third_party
           git clone https://github.com/ggml-org/llama.cpp.git native/android/third_party/llama.cpp
           cd native/android/third_party/llama.cpp
-          git checkout $(git log --before="2024-11-15" -1 --format="%H")
+          git checkout b3821
           echo "=== llama.cpp version ==="
           git log -1 --oneline
 
