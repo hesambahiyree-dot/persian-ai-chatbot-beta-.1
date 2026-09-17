@@ -39,7 +39,7 @@ void free_locked() {
         g_ctx = nullptr;
     }
     if (g_model) {
-        llama_model_free(g_model);
+        llama_free_model(g_model);
         g_model = nullptr;
     }
     g_ready.store(false);
@@ -161,11 +161,18 @@ Java_ai_nova_app_LlamaNative_nativeInit(
 
     llama_model_params mparams = llama_model_default_params();
     mparams.n_gpu_layers = 0;
+    mparams.use_mmap = true;
+    mparams.use_mlock = false;
 
-    LOGI("loading model: %s", path.c_str());
-    llama_model *model = llama_model_load_from_file(path.c_str(), mparams);
+    LOGI("loading model (mmap): %s", path.c_str());
+    llama_model *model = llama_load_model_from_file(path.c_str(), mparams);
     if (!model) {
-        LOGE("llama_model_load_from_file failed");
+        LOGI("mmap load failed, retry without mmap");
+        mparams.use_mmap = false;
+        model = llama_load_model_from_file(path.c_str(), mparams);
+    }
+    if (!model) {
+        LOGE("llama_load_model_from_file failed");
         return env->NewStringUTF(
             "{\"ready\":false,\"code\":\"error\",\"message\":\"بارگذاری GGUF ناموفق بود\"}");
     }
@@ -178,9 +185,9 @@ Java_ai_nova_app_LlamaNative_nativeInit(
     cparams.n_threads = threads;
     cparams.n_threads_batch = threads;
 
-    llama_context *ctx = llama_init_from_model(model, cparams);
+    llama_context *ctx = llama_new_context_with_model(model, cparams);
     if (!ctx) {
-        llama_model_free(model);
+        llama_free_model(model);
         return env->NewStringUTF(
             "{\"ready\":false,\"code\":\"error\",\"message\":\"ساخت context ناموفق بود\"}");
     }
@@ -229,11 +236,11 @@ Java_ai_nova_app_LlamaNative_nativeGenerate(
         return;
     }
 
-    const llama_vocab *vocab = llama_model_get_vocab(g_model);
+    const llama_vocab *vocab = llama_get_vocab(g_model);
     const int n_ctx = llama_n_ctx(g_ctx);
     const int n_batch = std::max(1, g_n_batch);
 
-    llama_memory_clear(llama_get_memory(g_ctx), true);
+    llama_kv_cache_clear(g_ctx);
 
     std::vector<llama_token> tokens(prompt.size() + 32);
     int n_tok = llama_tokenize(
