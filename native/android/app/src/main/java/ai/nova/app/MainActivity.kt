@@ -1,7 +1,9 @@
 package ai.nova.app
 
 import android.annotation.SuppressLint
+import android.net.http.SslError
 import android.os.Bundle
+import android.webkit.SslErrorHandler
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
@@ -25,6 +27,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(webView)
 
         val assetLoader = WebViewAssetLoader.Builder()
+            .setDomain("appassets.androidplatform.net")
             .addPathHandler("/", WebViewAssetLoader.AssetsPathHandler(this))
             .build()
 
@@ -33,6 +36,19 @@ class MainActivity : AppCompatActivity() {
                 view: WebView,
                 request: WebResourceRequest,
             ): WebResourceResponse? = assetLoader.shouldInterceptRequest(request.url)
+
+            override fun onReceivedSslError(
+                view: WebView?,
+                handler: SslErrorHandler?,
+                error: SslError?,
+            ) {
+                val url = error?.url ?: ""
+                if (url.contains("appassets.androidplatform.net")) {
+                    handler?.proceed()
+                } else {
+                    super.onReceivedSslError(view, handler, error)
+                }
+            }
         }
         webView.webChromeClient = WebChromeClient()
 
@@ -47,7 +63,7 @@ class MainActivity : AppCompatActivity() {
         settings.useWideViewPort = true
         settings.loadWithOverviewMode = true
         settings.textZoom = 100
-        WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
+        WebView.setWebContentsDebuggingEnabled(true)
 
         llamaBridge = LlamaBridge(this) { webView }
         paymentBridge = PaymentBridge(this)
