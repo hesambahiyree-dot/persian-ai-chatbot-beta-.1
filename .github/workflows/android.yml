@@ -42,80 +42,45 @@ jobs:
       - name: Build web UI
         run: npm run build
 
-      - name: Copy web assets into Android
+      - name: Copy web assets
         run: node scripts/prepare-android-assets.mjs
+
+      - name: Inject bridge
+        run: node scripts/inject-android-bridge.mjs
 
       - name: Fetch llama.cpp
         run: |
           mkdir -p native/android/third_party
-          git clone --depth 1 https://github.com/ggml-org/llama.cpp.git native/android/third_party/llama.cpp
-          echo "=== llama.cpp version ==="
+          git clone https://github.com/ggml-org/llama.cpp.git native/android/third_party/llama.cpp
           cd native/android/third_party/llama.cpp
-          git log -1 --oneline
+          git checkout b3821
 
-      - name: Download Model from Hugging Face
+      - name: Download Model
         run: |
           mkdir -p models
           curl -L -o models/gemma-3-4b-persian-v0.Q4_K_M.gguf \
             "https://huggingface.co/mradermacher/gemma-3-4b-persian-v0-GGUF/resolve/main/gemma-3-4b-persian-v0.Q4_K_M.gguf"
 
-      - name: Pack model OBB
+      - name: Pack OBB
         run: python3 scripts/build-model-obb.py
 
       - name: Write local.properties
-        run: |
-          echo "sdk.dir=$ANDROID_SDK_ROOT" > native/android/local.properties
-
-      - name: Fix mipmap icons
-        run: |
-          set -e
-          RES_DIR="native/android/app/src/main/res"
-          SRC_ICON="$RES_DIR/mipmap-hdpi/ic_launcher.png"
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq imagemagick
-          if [ ! -f "$SRC_ICON" ]; then
-            echo "ERROR: source icon not found at $SRC_ICON"
-            exit 1
-          fi
-          convert "$SRC_ICON" -strip -define png:color-type=6 -resize 192x192! /tmp/fixed_icon.png
-          cp /tmp/fixed_icon.png "$SRC_ICON"
-          declare -A SIZES
-          SIZES[mdpi]=48
-          SIZES[hdpi]=72
-          SIZES[xhdpi]=96
-          SIZES[xxhdpi]=144
-          SIZES[xxxhdpi]=192
-          for density in mdpi hdpi xhdpi xxhdpi xxxhdpi; do
-            mkdir -p "$RES_DIR/mipmap-$density"
-            TARGET="$RES_DIR/mipmap-$density/ic_launcher.png"
-            if [ -f "$TARGET" ]; then
-              convert "$TARGET" -strip -define png:color-type=6 -resize "${SIZES[$density]}x${SIZES[$density]}!" /tmp/fixed_$density.png
-            else
-              convert /tmp/fixed_icon.png -strip -define png:color-type=6 -resize "${SIZES[$density]}x${SIZES[$density]}!" /tmp/fixed_$density.png
-            fi
-            cp /tmp/fixed_$density.png "$TARGET"
-            echo "OK: mipmap-$density/ic_launcher.png (${SIZES[$density]}x${SIZES[$density]})"
-          done
-          echo "=== Final mipmap folders ==="
-          ls -la "$RES_DIR" | grep mipmap || true
+        run: echo "sdk.dir=$ANDROID_SDK_ROOT" > native/android/local.properties
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.11.1"
 
-      - name: Assemble APK
+      - name: Assemble Debug APK
         working-directory: native/android
-        env:
-          BAZAAR_RSA_PUBLIC_KEY: ${{ secrets.BAZAAR_RSA_PUBLIC_KEY }}
-          PLAY_LICENSE_KEY: ${{ secrets.PLAY_LICENSE_KEY }}
-        run: gradle :app:assembleRelease --no-daemon --stacktrace
+        run: gradle :app:assembleDebug --no-daemon --stacktrace
 
-      - name: Upload APK
+      - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: nova-ai-apk
-          path: native/android/app/build/outputs/apk/**/*.apk
+          name: nova-ai-apk-debug
+          path: native/android/app/build/outputs/apk/debug/**/*.apk
           if-no-files-found: error
 
       - name: Upload OBB
