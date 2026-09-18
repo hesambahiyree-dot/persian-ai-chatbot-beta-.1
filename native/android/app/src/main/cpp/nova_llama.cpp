@@ -64,12 +64,12 @@ bool utf8_complete(const std::string &s) {
     return false;
 }
 
-std::string token_piece(const llama_vocab *vocab, llama_token tok) {
+std::string token_piece(llama_token tok) {
     char buf[256];
-    int n = llama_token_to_piece(vocab, tok, buf, sizeof(buf), 0, true);
+    int n = llama_token_to_piece(g_model, tok, buf, sizeof(buf));
     if (n < 0) {
         std::string grow(static_cast<size_t>(-n), '\0');
-        llama_token_to_piece(vocab, tok, grow.data(), -n, 0, true);
+        llama_token_to_piece(g_model, tok, grow.data(), -n);
         return grow;
     }
     return std::string(buf, buf + n);
@@ -236,7 +236,6 @@ Java_ai_nova_app_LlamaNative_nativeGenerate(
         return;
     }
 
-    const llama_vocab *vocab = llama_get_vocab(g_model);
     const int n_ctx = llama_n_ctx(g_ctx);
     const int n_batch = std::max(1, g_n_batch);
 
@@ -244,12 +243,12 @@ Java_ai_nova_app_LlamaNative_nativeGenerate(
 
     std::vector<llama_token> tokens(prompt.size() + 32);
     int n_tok = llama_tokenize(
-        vocab, prompt.c_str(), static_cast<int32_t>(prompt.size()),
+        g_model, prompt.c_str(), static_cast<int32_t>(prompt.size()),
         tokens.data(), static_cast<int32_t>(tokens.size()), true, true);
     if (n_tok < 0) {
         tokens.resize(static_cast<size_t>(-n_tok));
         n_tok = llama_tokenize(
-            vocab, prompt.c_str(), static_cast<int32_t>(prompt.size()),
+            g_model, prompt.c_str(), static_cast<int32_t>(prompt.size()),
             tokens.data(), static_cast<int32_t>(tokens.size()), true, true);
     }
     if (n_tok <= 0) {
@@ -322,9 +321,9 @@ Java_ai_nova_app_LlamaNative_nativeGenerate(
         if (g_abort.load()) break;
         llama_token id = llama_sampler_sample(smpl, g_ctx, -1);
         llama_sampler_accept(smpl, id);
-        if (llama_vocab_is_eog(vocab, id)) break;
+        if (llama_token_is_eog(g_model, id)) break;
 
-        pending += token_piece(vocab, id);
+        pending += token_piece(id);
         std::string combined = out + pending;
         if (combined.find("<end_of_turn>") != std::string::npos ||
             combined.find("<start_of_turn>") != std::string::npos) {
