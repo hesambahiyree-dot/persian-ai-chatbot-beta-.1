@@ -66,10 +66,10 @@ bool utf8_complete(const std::string &s) {
 
 std::string token_piece(llama_token tok) {
     char buf[256];
-    int n = llama_token_to_piece(g_model, tok, buf, sizeof(buf));
+    int n = llama_token_to_piece(g_model, tok, buf, sizeof(buf), 0, true);
     if (n < 0) {
         std::string grow(static_cast<size_t>(-n), '\0');
-        llama_token_to_piece(g_model, tok, grow.data(), -n);
+        llama_token_to_piece(g_model, tok, grow.data(), -n, 0, true);
         return grow;
     }
     return std::string(buf, buf + n);
